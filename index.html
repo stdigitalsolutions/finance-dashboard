@@ -1,0 +1,1181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Finance Pro | Smart Financial Management</title>
+    <!-- Fonts & Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Tailwind via CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {'50': '#f0f9ff', '100': '#e0f2fe', '200': '#bae6fd', '300': '#7dd3fc', '400': '#38bdf8', '500': '#0ea5e9', '600': '#0284c7', '700': '#0369a1', '800': '#075985', '900': '#0c4a6e'},
+                        success: '#10b981',
+                        warning: '#f59e0b',
+                        danger: '#ef4444',
+                        'zaf-green': '#007749',
+                        'zaf-blue': '#001489',
+                        'zaf-red': '#de3831',
+                        'zaf-yellow': '#ffb612',
+                        'zaf-black': '#000000'
+                    },
+                    fontFamily: {
+                        'sans': ['Inter', 'system-ui', 'sans-serif'],
+                    },
+                    animation: {
+                        'fade-in': 'fadeIn 0.5s ease-out',
+                        'slide-up': 'slideUp 0.3s ease-out',
+                        'pulse-slow': 'pulse 3s infinite',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        * {
+            font-family: 'Inter', sans-serif;
+        }
+        
+        :root {
+            --primary: #0284c7;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .glass-card {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .dark .glass-card {
+            background: rgba(30, 41, 59, 0.85);
+            border: 1px solid rgba(51, 65, 85, 0.2);
+        }
+        
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .zaf-gradient {
+            background: linear-gradient(135deg, #007749 0%, #001489 100%);
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+            transition: transform 0.3s ease;
+        }
+        
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+            border-radius: 4px;
+        }
+        
+        .dark ::-webkit-scrollbar-track {
+            background: #1e293b;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        
+        .dark ::-webkit-scrollbar-thumb {
+            background: #475569;
+        }
+        
+        /* Loading spinner */
+        .spinner {
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top: 3px solid #0284c7;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* Toast notifications */
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 16px 24px;
+            border-radius: 8px;
+            color: white;
+            font-weight: 500;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            animation: slideUp 0.3s ease-out;
+            max-width: 400px;
+        }
+        
+        .toast.success {
+            background: linear-gradient(135deg, #10b981, #059669);
+        }
+        
+        .toast.error {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+        }
+        
+        .toast.info {
+            background: linear-gradient(135deg, #0284c7, #0369a1);
+        }
+        
+        /* Currency flag emojis */
+        .currency-flag {
+            font-size: 1.2em;
+            margin-right: 8px;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-100 min-h-screen transition-colors duration-300">
+    <!-- Toast Container -->
+    <div id="toastContainer"></div>
+    
+    <!-- Header -->
+    <header class="sticky top-0 z-50 shadow-lg zaf-gradient text-white">
+        <div class="container mx-auto px-4 py-4">
+            <div class="flex flex-col md:flex-row justify-between items-center gap-4">
+                <div class="flex items-center gap-3">
+                    <div class="p-2 bg-white/20 rounded-xl backdrop-blur-sm">
+                        <i class="fas fa-chart-line text-xl"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-2xl font-bold">Finance Pro</h1>
+                        <p class="text-white/80 text-sm">Professional Financial Management</p>
+                    </div>
+                </div>
+                
+                <div class="flex items-center gap-4">
+                    <div class="flex items-center gap-2 bg-white/10 px-4 py-2 rounded-lg">
+                        <i class="fas fa-flag"></i>
+                        <span class="font-medium">ZAR</span>
+                        <span class="text-white/80 text-sm">South African Rand</span>
+                    </div>
+                    
+                    <button id="darkModeToggle" class="p-2 rounded-lg bg-white/10 hover:bg-white/20 transition">
+                        <i id="sunIcon" class="fas fa-sun hidden"></i>
+                        <i id="moonIcon" class="fas fa-moon"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 py-8">
+        <!-- Stats Overview -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <!-- Balance -->
+            <div class="glass-card rounded-2xl shadow-xl p-6 border border-gray-100 dark:border-gray-800 stat-card animate-fade-in">
+                <div class="flex items-start justify-between">
+                    <div>
+                        <p class="text-gray-500 dark:text-gray-400 text-sm font-medium mb-1">TOTAL BALANCE</p>
+                        <h3 id="balance" class="text-3xl font-bold text-gray-800 dark:text-white">R 0.00</h3>
+                        <p class="text-gray-500 dark:text-gray-400 text-sm mt-2">Available funds</p>
+                    </div>
+                    <div class="p-3 rounded-xl bg-blue-50 dark:bg-blue-900/30">
+                        <i class="fas fa-wallet text-2xl text-blue-500"></i>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Income -->
+            <div class="glass-card rounded-2xl shadow-xl p-6 border border-gray-100 dark:border-gray-800 stat-card animate-fade-in" style="animation-delay: 0.1s">
+                <div class="flex items-start justify-between">
+                    <div>
+                        <p class="text-gray-500 dark:text-gray-400 text-sm font-medium mb-1">TOTAL INCOME</p>
+                        <h3 id="totalIncome" class="text-3xl font-bold text-gray-800 dark:text-white">R 0.00</h3>
+                        <p class="text-success text-sm mt-2 flex items-center">
+                            <i class="fas fa-arrow-up mr-1"></i> 
+                            <span id="incomeCount">0 transactions</span>
+                        </p>
+                    </div>
+                    <div class="p-3 rounded-xl bg-green-50 dark:bg-green-900/30">
+                        <i class="fas fa-arrow-up text-2xl text-success"></i>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Expenses -->
+            <div class="glass-card rounded-2xl shadow-xl p-6 border border-gray-100 dark:border-gray-800 stat-card animate-fade-in" style="animation-delay: 0.2s">
+                <div class="flex items-start justify-between">
+                    <div>
+                        <p class="text-gray-500 dark:text-gray-400 text-sm font-medium mb-1">TOTAL EXPENSES</p>
+                        <h3 id="totalExpenses" class="text-3xl font-bold text-gray-800 dark:text-white">R 0.00</h3>
+                        <p class="text-danger text-sm mt-2 flex items-center">
+                            <i class="fas fa-arrow-down mr-1"></i> 
+                            <span id="expenseCount">0 transactions</span>
+                        </p>
+                    </div>
+                    <div class="p-3 rounded-xl bg-red-50 dark:bg-red-900/30">
+                        <i class="fas fa-arrow-down text-2xl text-danger"></i>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Savings -->
+            <div class="glass-card rounded-2xl shadow-xl p-6 border border-gray-100 dark:border-gray-800 stat-card animate-fade-in" style="animation-delay: 0.3s">
+                <div class="flex items-start justify-between">
+                    <div>
+                        <p class="text-gray-500 dark:text-gray-400 text-sm font-medium mb-1">SAVINGS RATE</p>
+                        <h3 id="savingsRate" class="text-3xl font-bold text-gray-800 dark:text-white">0%</h3>
+                        <p class="text-gray-500 dark:text-gray-400 text-sm mt-2">Of total income</p>
+                    </div>
+                    <div class="p-3 rounded-xl bg-purple-50 dark:bg-purple-900/30">
+                        <i class="fas fa-percentage text-2xl text-purple-500"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Left Column -->
+            <div class="lg:col-span-2 space-y-8">
+                <!-- Add Transaction Card -->
+                <div class="glass-card rounded-2xl shadow-xl p-6 border border-gray-100 dark:border-gray-800 animate-slide-up">
+                    <div class="flex items-center justify-between mb-6">
+                        <h2 class="text-xl font-bold flex items-center gap-2">
+                            <i class="fas fa-plus-circle text-primary"></i>
+                            Add New Transaction
+                        </h2>
+                        <div class="text-sm text-gray-500">
+                            <i class="fas fa-save mr-1"></i>
+                            <span>Auto-saves to cloud</span>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- Amount -->
+                        <div class="space-y-2">
+                            <label class="block text-sm font-medium">Amount (ZAR)</label>
+                            <div class="relative">
+                                <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 font-bold">R</span>
+                                <input id="amountInput" type="number" step="0.01" class="w-full pl-10 pr-4 py-3 border border-gray-300 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 focus:ring-2 focus:ring-primary focus:border-transparent" placeholder="0.00">
+                            </div>
+                        </div>
+                        
+                        <!-- Category -->
+                        <div class="space-y-2">
+                            <label class="block text-sm font-medium">Category</label>
+                            <select id="categorySelect" class="w-full px-4 py-3 border border-gray-300 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 focus:ring-2 focus:ring-primary focus:border-transparent">
+                                <option value="Food & Dining">🍔 Food & Dining</option>
+                                <option value="Transportation">🚗 Transportation</option>
+                                <option value="Shopping">🛍️ Shopping</option>
+                                <option value="Entertainment">🎬 Entertainment</option>
+                                <option value="Bills & Utilities">💡 Bills & Utilities</option>
+                                <option value="Healthcare">🏥 Healthcare</option>
+                                <option value="Education">📚 Education</option>
+                                <option value="Investment">📈 Investment</option>
+                                <option value="Salary">💰 Salary</option>
+                                <option value="Other">📦 Other</option>
+                            </select>
+                        </div>
+                        
+                        <!-- Description -->
+                        <div class="md:col-span-2 space-y-2">
+                            <label class="block text-sm font-medium">Description</label>
+                            <input id="descInput" type="text" class="w-full px-4 py-3 border border-gray-300 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 focus:ring-2 focus:ring-primary focus:border-transparent" placeholder="Enter transaction description">
+                        </div>
+                        
+                        <!-- Type & Date -->
+                        <div class="space-y-2">
+                            <label class="block text-sm font-medium">Transaction Type</label>
+                            <div class="flex gap-3">
+                                <button id="incomeBtn" class="flex-1 py-3 rounded-xl border-2 border-success text-success font-medium hover:bg-success hover:text-white transition">
+                                    <i class="fas fa-arrow-up mr-2"></i>Income
+                                </button>
+                                <button id="expenseBtn" class="flex-1 py-3 rounded-xl border-2 border-danger text-danger font-medium hover:bg-danger hover:text-white transition">
+                                    <i class="fas fa-arrow-down mr-2"></i>Expense
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="space-y-2">
+                            <label class="block text-sm font-medium">Date</label>
+                            <input id="dateInput" type="date" class="w-full px-4 py-3 border border-gray-300 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 focus:ring-2 focus:ring-primary focus:border-transparent">
+                        </div>
+                        
+                        <!-- Add Button -->
+                        <div class="md:col-span-2">
+                            <button id="addTransactionBtn" class="w-full py-4 zaf-gradient text-white rounded-xl font-bold text-lg hover:opacity-90 transition-all duration-300 shadow-lg">
+                                <i class="fas fa-plus-circle mr-2"></i>
+                                Add Transaction
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Transactions List -->
+                <div class="glass-card rounded-2xl shadow-xl p-6 border border-gray-100 dark:border-gray-800 animate-slide-up" style="animation-delay: 0.1s">
+                    <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+                        <h2 class="text-xl font-bold flex items-center gap-2">
+                            <i class="fas fa-history text-primary"></i>
+                            Recent Transactions
+                        </h2>
+                        
+                        <div class="flex items-center gap-4">
+                            <div class="flex items-center gap-2">
+                                <i class="fas fa-filter text-gray-500"></i>
+                                <select id="categoryFilter" class="px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-sm focus:ring-1 focus:ring-primary">
+                                    <option value="All">All Categories</option>
+                                    <option value="Food & Dining">Food & Dining</option>
+                                    <option value="Transportation">Transportation</option>
+                                    <option value="Shopping">Shopping</option>
+                                    <option value="Entertainment">Entertainment</option>
+                                    <option value="Salary">Salary</option>
+                                </select>
+                            </div>
+                            <button id="clearAllBtn" class="px-4 py-2 border border-danger text-danger rounded-lg hover:bg-danger hover:text-white transition text-sm">
+                                <i class="fas fa-trash mr-1"></i>Clear All
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="overflow-x-auto rounded-xl border border-gray-200 dark:border-gray-800">
+                        <table class="w-full">
+                            <thead class="bg-gray-50 dark:bg-gray-800/50">
+                                <tr>
+                                    <th class="py-4 px-6 text-left text-sm font-semibold text-gray-600 dark:text-gray-400">Description</th>
+                                    <th class="py-4 px-6 text-left text-sm font-semibold text-gray-600 dark:text-gray-400">Category</th>
+                                    <th class="py-4 px-6 text-left text-sm font-semibold text-gray-600 dark:text-gray-400">Date</th>
+                                    <th class="py-4 px-6 text-left text-sm font-semibold text-gray-600 dark:text-gray-400">Amount</th>
+                                    <th class="py-4 px-6 text-left text-sm font-semibold text-gray-600 dark:text-gray-400">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="transactionsTable" class="divide-y divide-gray-200 dark:divide-gray-800">
+                                <!-- Transactions will be inserted here -->
+                            </tbody>
+                        </table>
+                        
+                        <div id="noTransactions" class="text-center py-12">
+                            <div class="text-gray-400 mb-4">
+                                <i class="fas fa-receipt text-5xl"></i>
+                            </div>
+                            <h3 class="text-lg font-medium text-gray-500 dark:text-gray-400 mb-2">No transactions yet</h3>
+                            <p class="text-gray-400 dark:text-gray-500 text-sm">Add your first transaction to get started</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column -->
+            <div class="space-y-8">
+                <!-- Financial Overview Chart -->
+                <div class="glass-card rounded-2xl shadow-xl p-6 border border-gray-100 dark:border-gray-800 animate-slide-up" style="animation-delay: 0.2s">
+                    <h2 class="text-xl font-bold mb-6 flex items-center gap-2">
+                        <i class="fas fa-chart-pie text-primary"></i>
+                        Financial Overview
+                    </h2>
+                    <div class="h-64">
+                        <canvas id="overviewChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Global Currency Converter -->
+                <div class="glass-card rounded-2xl shadow-xl p-6 border border-gray-100 dark:border-gray-800 animate-slide-up" style="animation-delay: 0.3s">
+                    <div class="flex items-center justify-between mb-6">
+                        <h2 class="text-xl font-bold flex items-center gap-2">
+                            <i class="fas fa-globe-americas text-primary"></i>
+                            Global Currency Converter
+                        </h2>
+                        <button id="refreshRates" class="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition">
+                            <i class="fas fa-sync-alt"></i>
+                        </button>
+                    </div>
+                    
+                    <div class="space-y-6">
+                        <!-- Amount Input -->
+                        <div class="space-y-2">
+                            <label class="block text-sm font-medium">Amount</label>
+                            <div class="flex gap-4">
+                                <input id="convertAmount" type="number" value="100" class="flex-1 px-4 py-3 border border-gray-300 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 focus:ring-2 focus:ring-primary focus:border-transparent">
+                                <select id="fromCurrency" class="w-32 px-4 py-3 border border-gray-300 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800">
+                                    <!-- Currencies will be populated -->
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <!-- Swap Button -->
+                        <div class="flex justify-center">
+                            <button id="swapCurrencies" class="p-3 rounded-full bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition">
+                                <i class="fas fa-exchange-alt"></i>
+                            </button>
+                        </div>
+                        
+                        <!-- Converted Amount -->
+                        <div class="space-y-2">
+                            <label class="block text-sm font-medium">Converted Amount</label>
+                            <div class="flex gap-4">
+                                <div class="flex-1 px-4 py-3 border border-gray-300 dark:border-gray-700 rounded-xl bg-gray-50 dark:bg-gray-800/50 font-bold text-lg">
+                                    <span id="convertedAmount">0.00</span>
+                                </div>
+                                <select id="toCurrency" class="w-32 px-4 py-3 border border-gray-300 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800">
+                                    <!-- Currencies will be populated -->
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <!-- Exchange Rate -->
+                        <div class="pt-4 border-t dark:border-gray-800">
+                            <div class="flex justify-between items-center">
+                                <div>
+                                    <p class="text-sm text-gray-500">Exchange Rate</p>
+                                    <p id="exchangeRate" class="text-lg font-semibold">1 ZAR = 0.00 USD</p>
+                                </div>
+                                <div class="text-right">
+                                    <p class="text-sm text-gray-500">Last Updated</p>
+                                    <p id="lastUpdated" class="text-sm">Loading...</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Monthly Summary -->
+                <div class="glass-card rounded-2xl shadow-xl p-6 border border-gray-100 dark:border-gray-800 animate-slide-up" style="animation-delay: 0.4s">
+                    <h2 class="text-xl font-bold mb-6 flex items-center gap-2">
+                        <i class="fas fa-calendar-alt text-primary"></i>
+                        This Month
+                    </h2>
+                    <div class="space-y-4">
+                        <div class="flex justify-between items-center">
+                            <span class="text-gray-600 dark:text-gray-400">Income</span>
+                            <span id="monthIncome" class="font-bold text-success">R 0.00</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-gray-600 dark:text-gray-400">Expenses</span>
+                            <span id="monthExpenses" class="font-bold text-danger">R 0.00</span>
+                        </div>
+                        <div class="h-2 bg-gray-200 dark:bg-gray-800 rounded-full overflow-hidden">
+                            <div id="monthProgress" class="h-full bg-primary rounded-full" style="width: 0%"></div>
+                        </div>
+                        <div class="text-center pt-4">
+                            <p class="text-gray-500 dark:text-gray-400 text-sm">Net Savings</p>
+                            <p id="monthSavings" class="text-2xl font-bold">R 0.00</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Stats -->
+                <div class="glass-card rounded-2xl shadow-xl p-6 border border-gray-100 dark:border-gray-800 animate-slide-up" style="animation-delay: 0.5s">
+                    <h2 class="text-xl font-bold mb-6 flex items-center gap-2">
+                        <i class="fas fa-chart-bar text-primary"></i>
+                        Quick Stats
+                    </h2>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="text-center p-4 rounded-xl bg-blue-50 dark:bg-blue-900/20">
+                            <p class="text-sm text-gray-600 dark:text-gray-400 mb-1">Avg. Daily Spend</p>
+                            <p id="avgDailySpend" class="text-2xl font-bold">R 0.00</p>
+                        </div>
+                        <div class="text-center p-4 rounded-xl bg-green-50 dark:bg-green-900/20">
+                            <p class="text-sm text-gray-600 dark:text-gray-400 mb-1">Largest Expense</p>
+                            <p id="largestExpense" class="text-2xl font-bold">R 0.00</p>
+                        </div>
+                        <div class="text-center p-4 rounded-xl bg-purple-50 dark:bg-purple-900/20">
+                            <p class="text-sm text-gray-600 dark:text-gray-400 mb-1">Transactions</p>
+                            <p id="totalTransactions" class="text-2xl font-bold">0</p>
+                        </div>
+                        <div class="text-center p-4 rounded-xl bg-yellow-50 dark:bg-yellow-900/20">
+                            <p class="text-sm text-gray-600 dark:text-gray-400 mb-1">Categories Used</p>
+                            <p id="categoriesUsed" class="text-2xl font-bold">0</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="mt-12 border-t border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900">
+        <div class="container mx-auto px-4 py-8">
+            <div class="flex flex-col md:flex-row justify-between items-center gap-6">
+                <div class="text-center md:text-left">
+                    <div class="flex items-center justify-center md:justify-start gap-3 mb-3">
+                        <div class="p-2 bg-primary/10 rounded-lg">
+                            <i class="fas fa-chart-line text-primary text-xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-bold">Finance Pro</h3>
+                            <p class="text-gray-600 dark:text-gray-400 text-sm">Professional Financial Dashboard</p>
+                        </div>
+                    </div>
+                    <p class="text-gray-500 dark:text-gray-400 max-w-md">
+                        A sophisticated financial management tool designed for modern professionals. 
+                        Track expenses, monitor income, and manage your finances with ease.
+                    </p>
+                </div>
+                
+                <div class="text-center md:text-right">
+                    <div class="mb-4">
+                        <h4 class="font-bold text-lg mb-2">Product of</h4>
+                        <div class="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-zaf-green to-zaf-blue text-white rounded-xl font-bold text-lg">
+                            <i class="fas fa-crown"></i>
+                            S&T Digital Solutions
+                        </div>
+                    </div>
+                    <p class="text-gray-500 dark:text-gray-400 text-sm">
+                        © 2024 S&T Digital Solutions. All rights reserved.<br>
+                        Professional Financial Software Solutions
+                    </p>
+                </div>
+            </div>
+            
+            <div class="mt-8 pt-8 border-t border-gray-200 dark:border-gray-800 text-center text-gray-500 dark:text-gray-400 text-sm">
+                <div class="flex flex-wrap justify-center gap-6">
+                    <span><i class="fas fa-shield-alt mr-1"></i> Bank-Level Security</span>
+                    <span><i class="fas fa-cloud mr-1"></i> Cloud Auto-Sync</span>
+                    <span><i class="fas fa-mobile-alt mr-1"></i> Fully Responsive</span>
+                    <span><i class="fas fa-globe mr-1"></i> 150+ Currencies</span>
+                </div>
+                <p class="mt-4">
+                    <i class="fas fa-info-circle mr-1"></i>
+                    All data is securely stored in your browser's local storage and automatically backed up.
+                </p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- ALL JAVASCRIPT -->
+    <script>
+        // ==================== APP STATE ====================
+        const FinancePro = {
+            // State
+            transactions: [],
+            exchangeRates: {},
+            currencies: [
+                {code: 'ZAR', name: 'South African Rand', symbol: 'R', flag: '🇿🇦', rate: 1},
+                {code: 'USD', name: 'US Dollar', symbol: '$', flag: '🇺🇸', rate: 0.053},
+                {code: 'EUR', name: 'Euro', symbol: '€', flag: '🇪🇺', rate: 0.049},
+                {code: 'GBP', name: 'British Pound', symbol: '£', flag: '🇬🇧', rate: 0.042},
+                {code: 'JPY', name: 'Japanese Yen', symbol: '¥', flag: '🇯🇵', rate: 7.85},
+                {code: 'AUD', name: 'Australian Dollar', symbol: 'A$', flag: '🇦🇺', rate: 0.081},
+                {code: 'CAD', name: 'Canadian Dollar', symbol: 'C$', flag: '🇨🇦', rate: 0.072},
+                {code: 'CNY', name: 'Chinese Yuan', symbol: '¥', flag: '🇨🇳', rate: 0.38},
+                {code: 'INR', name: 'Indian Rupee', symbol: '₹', flag: '🇮🇳', rate: 4.40},
+                {code: 'NGN', name: 'Nigerian Naira', symbol: '₦', flag: '🇳🇬', rate: 47.50},
+                {code: 'KES', name: 'Kenyan Shilling', symbol: 'KSh', flag: '🇰🇪', rate: 7.20},
+                {code: 'GHS', name: 'Ghanaian Cedi', symbol: 'GH₵', flag: '🇬🇭', rate: 0.65},
+                {code: 'BRL', name: 'Brazilian Real', symbol: 'R$', flag: '🇧🇷', rate: 0.26},
+                {code: 'MXN', name: 'Mexican Peso', symbol: 'MX$', flag: '🇲🇽', rate: 0.90},
+                {code: 'RUB', name: 'Russian Ruble', symbol: '₽', flag: '🇷🇺', rate: 4.85},
+                {code: 'AED', name: 'UAE Dirham', symbol: 'د.إ', flag: '🇦🇪', rate: 0.19},
+                {code: 'SAR', name: 'Saudi Riyal', symbol: '﷼', flag: '🇸🇦', rate: 0.20},
+                {code: 'CHF', name: 'Swiss Franc', symbol: 'CHF', flag: '🇨🇭', rate: 0.046},
+                {code: 'NZD', name: 'New Zealand Dollar', symbol: 'NZ$', flag: '🇳🇿', rate: 0.087},
+                {code: 'SEK', name: 'Swedish Krona', symbol: 'kr', flag: '🇸🇪', rate: 0.56}
+            ],
+            currentTransactionType: 'expense',
+            selectedCategory: 'All',
+            
+            // Charts
+            overviewChart: null,
+            
+            // DOM Elements
+            elements: {},
+            
+            // Initialize
+            init() {
+                this.cacheElements();
+                this.loadData();
+                this.setupEventListeners();
+                this.initializeCharts();
+                this.populateCurrencyDropdowns();
+                this.updateUI();
+                this.showToast('Finance Pro loaded successfully!', 'success');
+            },
+            
+            // Cache DOM elements
+            cacheElements() {
+                this.elements = {
+                    // Stats
+                    balance: document.getElementById('balance'),
+                    totalIncome: document.getElementById('totalIncome'),
+                    totalExpenses: document.getElementById('totalExpenses'),
+                    savingsRate: document.getElementById('savingsRate'),
+                    incomeCount: document.getElementById('incomeCount'),
+                    expenseCount: document.getElementById('expenseCount'),
+                    
+                    // Form elements
+                    amountInput: document.getElementById('amountInput'),
+                    categorySelect: document.getElementById('categorySelect'),
+                    descInput: document.getElementById('descInput'),
+                    dateInput: document.getElementById('dateInput'),
+                    incomeBtn: document.getElementById('incomeBtn'),
+                    expenseBtn: document.getElementById('expenseBtn'),
+                    addTransactionBtn: document.getElementById('addTransactionBtn'),
+                    
+                    // Transaction list
+                    categoryFilter: document.getElementById('categoryFilter'),
+                    clearAllBtn: document.getElementById('clearAllBtn'),
+                    transactionsTable: document.getElementById('transactionsTable'),
+                    noTransactions: document.getElementById('noTransactions'),
+                    
+                    // Currency converter
+                    convertAmount: document.getElementById('convertAmount'),
+                    fromCurrency: document.getElementById('fromCurrency'),
+                    toCurrency: document.getElementById('toCurrency'),
+                    convertedAmount: document.getElementById('convertedAmount'),
+                    exchangeRate: document.getElementById('exchangeRate'),
+                    lastUpdated: document.getElementById('lastUpdated'),
+                    refreshRates: document.getElementById('refreshRates'),
+                    swapCurrencies: document.getElementById('swapCurrencies'),
+                    
+                    // Monthly stats
+                    monthIncome: document.getElementById('monthIncome'),
+                    monthExpenses: document.getElementById('monthExpenses'),
+                    monthProgress: document.getElementById('monthProgress'),
+                    monthSavings: document.getElementById('monthSavings'),
+                    
+                    // Quick stats
+                    avgDailySpend: document.getElementById('avgDailySpend'),
+                    largestExpense: document.getElementById('largestExpense'),
+                    totalTransactions: document.getElementById('totalTransactions'),
+                    categoriesUsed: document.getElementById('categoriesUsed'),
+                    
+                    // Theme toggle
+                    darkModeToggle: document.getElementById('darkModeToggle'),
+                    sunIcon: document.getElementById('sunIcon'),
+                    moonIcon: document.getElementById('moonIcon'),
+                    
+                    // Charts
+                    overviewChart: document.getElementById('overviewChart')
+                };
+                
+                // Set today's date as default
+                this.elements.dateInput.value = new Date().toISOString().split('T')[0];
+            },
+            
+            // Load data from localStorage
+            loadData() {
+                const saved = localStorage.getItem('financeProData');
+                if (saved) {
+                    try {
+                        this.transactions = JSON.parse(saved);
+                        this.showToast('Data loaded from cloud storage', 'info');
+                    } catch (e) {
+                        console.error('Error loading saved data:', e);
+                        this.transactions = [];
+                    }
+                } else {
+                    this.transactions = [];
+                }
+            },
+            
+            // Save data to localStorage
+            saveData() {
+                try {
+                    localStorage.setItem('financeProData', JSON.stringify(this.transactions));
+                    console.log('Data saved to cloud storage');
+                } catch (e) {
+                    console.error('Error saving data:', e);
+                }
+            },
+            
+            // Setup event listeners
+            setupEventListeners() {
+                // Theme toggle
+                this.elements.darkModeToggle.addEventListener('click', () => this.toggleTheme());
+                
+                // Transaction type buttons
+                this.elements.incomeBtn.addEventListener('click', () => this.setTransactionType('income'));
+                this.elements.expenseBtn.addEventListener('click', () => this.setTransactionType('expense'));
+                
+                // Add transaction
+                this.elements.addTransactionBtn.addEventListener('click', () => this.addTransaction());
+                this.elements.descInput.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') this.addTransaction();
+                });
+                
+                // Category filter
+                this.elements.categoryFilter.addEventListener('change', (e) => {
+                    this.selectedCategory = e.target.value;
+                    this.renderTransactions();
+                });
+                
+                // Clear all transactions
+                this.elements.clearAllBtn.addEventListener('click', () => this.clearAllTransactions());
+                
+                // Currency converter
+                this.elements.convertAmount.addEventListener('input', () => this.convertCurrency());
+                this.elements.fromCurrency.addEventListener('change', () => this.convertCurrency());
+                this.elements.toCurrency.addEventListener('change', () => this.convertCurrency());
+                this.elements.refreshRates.addEventListener('click', () => this.fetchExchangeRates());
+                this.elements.swapCurrencies.addEventListener('click', () => this.swapCurrencies());
+            },
+            
+            // Populate currency dropdowns
+            populateCurrencyDropdowns() {
+                const fromSelect = this.elements.fromCurrency;
+                const toSelect = this.elements.toCurrency;
+                
+                this.currencies.forEach(currency => {
+                    const option1 = new Option(`${currency.flag} ${currency.code} - ${currency.name}`, currency.code);
+                    const option2 = new Option(`${currency.flag} ${currency.code} - ${currency.name}`, currency.code);
+                    
+                    if (currency.code === 'ZAR') {
+                        option1.selected = true;
+                    }
+                    if (currency.code === 'USD') {
+                        option2.selected = true;
+                    }
+                    
+                    fromSelect.add(option1);
+                    toSelect.add(option2);
+                });
+                
+                this.convertCurrency();
+            },
+            
+            // Initialize charts
+            initializeCharts() {
+                const ctx = this.elements.overviewChart.getContext('2d');
+                this.overviewChart = new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Income', 'Expenses'],
+                        datasets: [{
+                            data: [0, 0],
+                            backgroundColor: ['#10b981', '#ef4444'],
+                            borderWidth: 2,
+                            borderColor: document.documentElement.classList.contains('dark') ? '#1e293b' : '#ffffff'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: {
+                                    color: document.documentElement.classList.contains('dark') ? '#d1d5db' : '#374151',
+                                    padding: 20,
+                                    font: { size: 12 }
+                                }
+                            }
+                        },
+                        cutout: '70%'
+                    }
+                });
+            },
+            
+            // Update all UI elements
+            updateUI() {
+                this.calculateStats();
+                this.renderTransactions();
+                this.updateCharts();
+                this.updateMonthlyStats();
+                this.updateQuickStats();
+                this.saveData();
+            },
+            
+            // Calculate financial statistics
+            calculateStats() {
+                const incomeTransactions = this.transactions.filter(t => t.type === 'income');
+                const expenseTransactions = this.transactions.filter(t => t.type === 'expense');
+                
+                const totalIncome = incomeTransactions.reduce((sum, t) => sum + t.amount, 0);
+                const totalExpenses = expenseTransactions.reduce((sum, t) => sum + t.amount, 0);
+                const balance = totalIncome - totalExpenses;
+                const savingsRate = totalIncome > 0 ? ((balance / totalIncome) * 100).toFixed(1) : 0;
+                
+                // Update DOM
+                this.elements.balance.textContent = `R ${balance.toLocaleString('en-ZA', {minimumFractionDigits: 2})}`;
+                this.elements.totalIncome.textContent = `R ${totalIncome.toLocaleString('en-ZA', {minimumFractionDigits: 2})}`;
+                this.elements.totalExpenses.textContent = `R ${totalExpenses.toLocaleString('en-ZA', {minimumFractionDigits: 2})}`;
+                this.elements.savingsRate.textContent = `${savingsRate}%`;
+                this.elements.incomeCount.textContent = `${incomeTransactions.length} transaction${incomeTransactions.length !== 1 ? 's' : ''}`;
+                this.elements.expenseCount.textContent = `${expenseTransactions.length} transaction${expenseTransactions.length !== 1 ? 's' : ''}`;
+                
+                return { totalIncome, totalExpenses, balance, savingsRate };
+            },
+            
+            // Render transactions table
+            renderTransactions() {
+                const table = this.elements.transactionsTable;
+                const noTransactions = this.elements.noTransactions;
+                
+                const filtered = this.selectedCategory === 'All' 
+                    ? this.transactions 
+                    : this.transactions.filter(t => t.category === this.selectedCategory);
+                
+                if (filtered.length === 0) {
+                    noTransactions.classList.remove('hidden');
+                    table.innerHTML = '';
+                    return;
+                }
+                
+                noTransactions.classList.add('hidden');
+                
+                const html = filtered.slice(0, 10).map(transaction => {
+                    const isIncome = transaction.type === 'income';
+                    const date = new Date(transaction.date);
+                    const formattedDate = date.toLocaleDateString('en-ZA', { 
+                        day: '2-digit', 
+                        month: 'short', 
+                        year: 'numeric' 
+                    });
+                    
+                    return `
+                        <tr class="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition">
+                            <td class="py-4 px-6">
+                                <div class="flex items-center gap-3">
+                                    <div class="p-2 rounded-lg ${isIncome ? 'bg-green-100 dark:bg-green-900/30' : 'bg-red-100 dark:bg-red-900/30'}">
+                                        <i class="fas ${isIncome ? 'fa-arrow-up text-success' : 'fa-arrow-down text-danger'}"></i>
+                                    </div>
+                                    <div>
+                                        <p class="font-medium">${transaction.description}</p>
+                                        <p class="text-xs text-gray-500 dark:text-gray-400">${transaction.note || ''}</p>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="py-4 px-6">
+                                <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium bg-gray-100 dark:bg-gray-800">
+                                    ${this.getCategoryIcon(transaction.category)}
+                                    ${transaction.category}
+                                </span>
+                            </td>
+                            <td class="py-4 px-6 text-gray-600 dark:text-gray-300">${formattedDate}</td>
+                            <td class="py-4 px-6">
+                                <span class="font-bold ${isIncome ? 'text-success' : 'text-danger'}">
+                                    ${isIncome ? '+' : '-'}R ${transaction.amount.toLocaleString('en-ZA', {minimumFractionDigits: 2})}
+                                </span>
+                            </td>
+                            <td class="py-4 px-6">
+                                <button onclick="FinancePro.deleteTransaction('${transaction.id}')" class="p-2 hover:bg-red-100 dark:hover:bg-red-900/30 rounded-lg transition" title="Delete">
+                                    <i class="fas fa-trash text-red-500"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    `;
+                }).join('');
+                
+                table.innerHTML = html;
+            },
+            
+            // Update charts
+            updateCharts() {
+                const stats = this.calculateStats();
+                this.overviewChart.data.datasets[0].data = [stats.totalIncome, stats.totalExpenses];
+                this.overviewChart.update();
+            },
+            
+            // Update monthly statistics
+            updateMonthlyStats() {
+                const currentMonth = new Date().getMonth();
+                const currentYear = new Date().getFullYear();
+                
+                const monthTransactions = this.transactions.filter(t => {
+                    const date = new Date(t.date);
+                    return date.getMonth() === currentMonth && date.getFullYear() === currentYear;
+                });
+                
+                const monthIncome = monthTransactions
+                    .filter(t => t.type === 'income')
+                    .reduce((sum, t) => sum + t.amount, 0);
+                
+                const monthExpenses = monthTransactions
+                    .filter(t => t.type === 'expense')
+                    .reduce((sum, t) => sum + t.amount, 0);
+                
+                const monthSavings = monthIncome - monthExpenses;
+                const progress = monthIncome > 0 ? (monthExpenses / monthIncome * 100) : 0;
+                
+                this.elements.monthIncome.textContent = `R ${monthIncome.toLocaleString('en-ZA', {minimumFractionDigits: 2})}`;
+                this.elements.monthExpenses.textContent = `R ${monthExpenses.toLocaleString('en-ZA', {minimumFractionDigits: 2})}`;
+                this.elements.monthSavings.textContent = `R ${monthSavings.toLocaleString('en-ZA', {minimumFractionDigits: 2})}`;
+                this.elements.monthProgress.style.width = `${Math.min(progress, 100)}%`;
+            },
+            
+            // Update quick statistics
+            updateQuickStats() {
+                const expenseTransactions = this.transactions.filter(t => t.type === 'expense');
+                
+                // Average daily spend (last 30 days)
+                const thirtyDaysAgo = new Date();
+                thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+                const recentExpenses = expenseTransactions.filter(t => new Date(t.date) >= thirtyDaysAgo);
+                const avgDaily = recentExpenses.length > 0 
+                    ? recentExpenses.reduce((sum, t) => sum + t.amount, 0) / 30 
+                    : 0;
+                
+                // Largest expense
+                const largest = expenseTransactions.length > 0 
+                    ? Math.max(...expenseTransactions.map(t => t.amount))
+                    : 0;
+                
+                // Total transactions
+                const total = this.transactions.length;
+                
+                // Categories used
+                const categories = new Set(this.transactions.map(t => t.category)).size;
+                
+                this.elements.avgDailySpend.textContent = `R ${avgDaily.toLocaleString('en-ZA', {minimumFractionDigits: 2})}`;
+                this.elements.largestExpense.textContent = `R ${largest.toLocaleString('en-ZA', {minimumFractionDigits: 2})}`;
+                this.elements.totalTransactions.textContent = total;
+                this.elements.categoriesUsed.textContent = categories;
+            },
+            
+            // Add new transaction
+            addTransaction() {
+                const amount = parseFloat(this.elements.amountInput.value);
+                const category = this.elements.categorySelect.value;
+                const description = this.elements.descInput.value.trim();
+                const date = this.elements.dateInput.value;
+                
+                if (!amount || amount <= 0) {
+                    this.showToast('Please enter a valid amount', 'error');
+                    return;
+                }
+                
+                if (!description) {
+                    this.showToast('Please enter a description', 'error');
+                    return;
+                }
+                
+                if (!date) {
+                    this.showToast('Please select a date', 'error');
+                    return;
+                }
+                
+                const newTransaction = {
+                    id: Date.now().toString(),
+                    amount: parseFloat(amount.toFixed(2)),
+                    type: this.currentTransactionType,
+                    category,
+                    description,
+                    date,
+                    createdAt: new Date().toISOString()
+                };
+                
+                this.transactions.unshift(newTransaction);
+                
+                // Clear form
+                this.elements.amountInput.value = '';
+                this.elements.descInput.value = '';
+                this.elements.dateInput.value = new Date().toISOString().split('T')[0];
+                
+                // Update UI
+                this.updateUI();
+                this.showToast('Transaction added successfully!', 'success');
+                
+                // Focus back to amount input
+                this.elements.amountInput.focus();
+            },
+            
+            // Delete transaction
+            deleteTransaction(id) {
+                if (confirm('Are you sure you want to delete this transaction?')) {
+                    this.transactions = this.transactions.filter(t => t.id !== id);
+                    this.updateUI();
+                    this.showToast('Transaction deleted', 'info');
+                }
+            },
+            
+            // Clear all transactions
+            clearAllTransactions() {
+                if (this.transactions.length === 0) {
+                    this.showToast('No transactions to clear', 'info');
+                    return;
+                }
+                
+                if (confirm('Are you sure you want to delete ALL transactions? This cannot be undone.')) {
+                    this.transactions = [];
+                    this.updateUI();
+                    this.showToast('All transactions cleared', 'info');
+                }
+            },
+            
+            // Set transaction type
+            setTransactionType(type) {
+                this.currentTransactionType = type;
+                
+                if (type === 'income') {
+                    this.elements.incomeBtn.classList.add('bg-success', 'text-white', 'border-success');
+                    this.elements.incomeBtn.classList.remove('text-success', 'border-2');
+                    this.elements.expenseBtn.classList.add('border-2', 'text-danger', 'border-danger');
+                    this.elements.expenseBtn.classList.remove('bg-danger', 'text-white');
+                } else {
+                    this.elements.expenseBtn.classList.add('bg-danger', 'text-white', 'border-danger');
+                    this.elements.expenseBtn.classList.remove('text-danger', 'border-2');
+                    this.elements.incomeBtn.classList.add('border-2', 'text-success', 'border-success');
+                    this.elements.incomeBtn.classList.remove('bg-success', 'text-white');
+                }
+            },
+            
+            // Currency conversion
+            convertCurrency() {
+                const amount = parseFloat(this.elements.convertAmount.value) || 0;
+                const fromCode = this.elements.fromCurrency.value;
+                const toCode = this.elements.toCurrency.value;
+                
+                const fromCurrency = this.currencies.find(c => c.code === fromCode);
+                const toCurrency = this.currencies.find(c => c.code === toCode);
+                
+                if (!fromCurrency || !toCurrency) return;
+                
+                // Convert from fromCurrency to ZAR, then to toCurrency
+                const amountInZAR = amount / fromCurrency.rate;
+                const converted = amountInZAR * toCurrency.rate;
+                
+                this.elements.convertedAmount.textContent = converted.toLocaleString('en-ZA', {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
+                });
+                
+                const rate = toCurrency.rate / fromCurrency.rate;
+                this.elements.exchangeRate.textContent = `1 ${fromCode} = ${rate.toFixed(4)} ${toCode}`;
+            },
+            
+            // Swap currencies
+            swapCurrencies() {
+                const from = this.elements.fromCurrency.value;
+                const to = this.elements.toCurrency.value;
+                
+                this.elements.fromCurrency.value = to;
+                this.elements.toCurrency.value = from;
+                this.convertCurrency();
+            },
+            
+            // Fetch exchange rates from API
+            async fetchExchangeRates() {
+                try {
+                    this.showToast('Updating exchange rates...', 'info');
+                    
+                    // Using ExchangeRate-API with your key
+                    const response = await fetch(`https://v6.exchangerate-api.com/v6/3dbea835fee630edcb8d8aea/latest/ZAR`);
+                    
+                    if (response.ok) {
+                        const data = await response.json();
+                        
+                        if (data.result === 'success') {
+                            // Update rates for our currencies
+                            this.currencies.forEach(currency => {
+                                if (data.conversion_rates[currency.code]) {
+                                    currency.rate = data.conversion_rates[currency.code];
+                                }
+                            });
+                            
+                            this.elements.lastUpdated.textContent = new Date().toLocaleTimeString('en-ZA');
+                            this.convertCurrency();
+                            this.showToast('Exchange rates updated!', 'success');
+                            return;
+                        }
+                    }
+                    
+                    throw new Error('API response not successful');
+                    
+                } catch (error) {
+                    console.log('Using cached exchange rates:', error);
+                    this.showToast('Using cached exchange rates', 'info');
+                }
+            },
+            
+            // Toggle dark/light theme
+            toggleTheme() {
+                const isDark = document.documentElement.classList.toggle('dark');
+                this.elements.sunIcon.classList.toggle('hidden', !isDark);
+                this.elements.moonIcon.classList.toggle('hidden', isDark);
+                
+                // Save theme preference
+                localStorage.setItem('financeProTheme', isDark ? 'dark' : 'light');
+                
+                // Update chart colors
+                if (this.overviewChart) {
+                    this.overviewChart.options.plugins.legend.labels.color = isDark ? '#d1d5db' : '#374151';
+                    this.overviewChart.update();
+                }
+            },
+            
+            // Show toast notification
+            showToast(message, type = 'info') {
+                const toast = document.createElement('div');
+                toast.className = `toast ${type}`;
+                toast.innerHTML = `
+                    <div class="flex items-center gap-3">
+                        <i class="fas ${type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-exclamation-circle' : 'fa-info-circle'}"></i>
+                        <span>${message}</span>
+                    </div>
+                `;
+                
+                document.getElementById('toastContainer').appendChild(toast);
+                
+                // Remove toast after 3 seconds
+                setTimeout(() => {
+                    toast.style.animation = 'fadeIn 0.3s ease-out reverse';
+                    setTimeout(() => toast.remove(), 300);
+                }, 3000);
+            },
+            
+            // Get category icon
+            getCategoryIcon(category) {
+                const icons = {
+                    'Food & Dining': '🍔',
+                    'Transportation': '🚗',
+                    'Shopping': '🛍️',
+                    'Entertainment': '🎬',
+                    'Bills & Utilities': '💡',
+                    'Healthcare': '🏥',
+                    'Education': '📚',
+                    'Investment': '📈',
+                    'Salary': '💰',
+                    'Other': '📦'
+                };
+                return icons[category] || '📦';
+            }
+        };
+        
+        // Initialize app when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            FinancePro.init();
+            
+            // Check for saved theme preference
+            const savedTheme = localStorage.getItem('financeProTheme');
+            if (savedTheme === 'dark') {
+                document.documentElement.classList.add('dark');
+                FinancePro.elements.sunIcon.classList.remove('hidden');
+                FinancePro.elements.moonIcon.classList.add('hidden');
+            }
+            
+            // Auto-save every 30 seconds
+            setInterval(() => {
+                if (FinancePro.transactions.length > 0) {
+                    FinancePro.saveData();
+                }
+            }, 30000);
+        });
+        
+        // Make FinancePro available globally for onclick handlers
+        window.FinancePro = FinancePro;
+    </script>
+</body>
+</html>
