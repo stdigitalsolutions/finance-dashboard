@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MoneyTrack - Personal Finance Tracker</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/x-icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💰</text></svg>">
+    <meta name="theme-color" content="#10b981">
+    <meta name="description" content="Track your income, expenses, and savings with MoneyTrack - Your personal finance manager">
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div class="loading-screen" id="loadingScreen">
+        <div class="loading-content">
+            <div class="loading-spinner"></div>
+            <h2>MoneyTrack</h2>
+            <p>Loading your financial data...</p>
+        </div>
+    </div>
+
+    <!-- Main App -->
+    <div class="app-container" id="appContainer">
+        <!-- Header -->
+        <header class="app-header">
+            <div class="header-content">
+                <div class="logo">
+                    <i class="fas fa-chart-line"></i>
+                    <h1>MoneyTrack</h1>
+                </div>
+                <div class="header-actions">
+                    <button class="btn-icon" id="themeToggle" aria-label="Toggle theme">
+                        <i class="fas fa-moon"></i>
+                    </button>
+                    <button class="btn-icon" id="exportBtn" aria-label="Export data">
+                        <i class="fas fa-file-export"></i>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Dashboard -->
+        <main class="dashboard">
+            <!-- Summary Cards -->
+            <section class="summary-section">
+                <div class="summary-grid">
+                    <div class="summary-card income">
+                        <div class="summary-icon">
+                            <i class="fas fa-money-bill-wave"></i>
+                        </div>
+                        <div class="summary-content">
+                            <h3>Total Income</h3>
+                            <p class="summary-amount" id="totalIncome">R 0.00</p>
+                            <p class="summary-period">This Month</p>
+                        </div>
+                    </div>
+
+                    <div class="summary-card expense">
+                        <div class="summary-icon">
+                            <i class="fas fa-shopping-cart"></i>
+                        </div>
+                        <div class="summary-content">
+                            <h3>Total Expenses</h3>
+                            <p class="summary-amount" id="totalExpense">R 0.00</p>
+                            <p class="summary-period">This Month</p>
+                        </div>
+                    </div>
+
+                    <div class="summary-card balance">
+                        <div class="summary-icon">
+                            <i class="fas fa-wallet"></i>
+                        </div>
+                        <div class="summary-content">
+                            <h3>Balance</h3>
+                            <p class="summary-amount" id="totalBalance">R 0.00</p>
+                            <p class="summary-period">Available</p>
+                        </div>
+                    </div>
+
+                    <div class="summary-card savings">
+                        <div class="summary-icon">
+                            <i class="fas fa-piggy-bank"></i>
+                        </div>
+                        <div class="summary-content">
+                            <h3>Savings Rate</h3>
+                            <p class="summary-amount" id="savingsRate">0%</p>
+                            <p class="summary-period">Of Income</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Main Content Area -->
+            <div class="main-content">
+                <!-- Left Column: Add Transaction & Categories -->
+                <div class="left-column">
+                    <!-- Add Transaction Form -->
+                    <section class="add-transaction card">
+                        <h2><i class="fas fa-plus-circle"></i> Add Transaction</h2>
+                        <form id="transactionForm">
+                            <div class="form-group">
+                                <label for="transactionType">
+                                    <i class="fas fa-exchange-alt"></i> Type
+                                </label>
+                                <div class="type-selector">
+                                    <button type="button" class="type-btn active" data-type="income">
+                                        <i class="fas fa-money-bill-wave"></i> Income
+                                    </button>
+                                    <button type="button" class="type-btn" data-type="expense">
+                                        <i class="fas fa-shopping-cart"></i> Expense
+                                    </button>
+                                </div>
+                                <input type="hidden" id="transactionType" value="income">
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="amount">
+                                        <i class="fas fa-rand-sign"></i> Amount (R)
+                                    </label>
+                                    <input type="number" id="amount" step="0.01" min="0.01" required placeholder="0.00">
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="date">
+                                        <i class="far fa-calendar"></i> Date
+                                    </label>
+                                    <input type="date" id="date" required>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="category">
+                                    <i class="fas fa-tag"></i> Category
+                                </label>
+                                <div class="category-selector" id="categorySelector">
+                                    <!-- Categories will be populated by JavaScript -->
+                                </div>
+                                <input type="hidden" id="category" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="description">
+                                    <i class="far fa-comment"></i> Description
+                                </label>
+                                <input type="text" id="description" placeholder="Salary, Groceries, etc." required>
+                            </div>
+
+                            <div class="form-actions">
+                                <button type="button" class="btn-secondary" id="clearForm">
+                                    <i class="fas fa-times"></i> Clear
+                                </button>
+                                <button type="submit" class="btn-primary">
+                                    <i class="fas fa-check"></i> Add Transaction
+                                </button>
+                            </div>
+                        </form>
+                    </section>
+
+                    <!-- Category Management -->
+                    <section class="categories card">
+                        <div class="section-header">
+                            <h2><i class="fas fa-tags"></i> Categories</h2>
+                            <button class="btn-icon" id="addCategoryBtn" aria-label="Add category">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                        </div>
+                        <div class="categories-list" id="categoriesList">
+                            <!-- Categories will be populated by JavaScript -->
+                        </div>
+                    </section>
+                </div>
+
+                <!-- Right Column: Transaction History & Charts -->
+                <div class="right-column">
+                    <!-- Transaction History -->
+                    <section class="transactions card">
+                        <div class="section-header">
+                            <h2><i class="fas fa-history"></i> Recent Transactions</h2>
+                            <div class="filter-actions">
+                                <select id="transactionFilter" class="filter-select">
+                                    <option value="all">All Transactions</option>
+                                    <option value="income">Income Only</option>
+                                    <option value="expense">Expenses Only</option>
+                                    <option value="today">Today</option>
+                                    <option value="week">This Week</option>
+                                    <option value="month">This Month</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="transactions-list" id="transactionsList">
+                            <!-- Transactions will be populated by JavaScript -->
+                            <div class="empty-state">
+                                <i class="fas fa-receipt"></i>
+                                <h3>No transactions yet</h3>
+                                <p>Add your first transaction to get started</p>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Charts Section -->
+                    <section class="charts-section">
+                        <div class="chart-card card">
+                            <div class="section-header">
+                                <h2><i class="fas fa-chart-pie"></i> Expense Breakdown</h2>
+                                <select id="chartPeriod" class="filter-select">
+                                    <option value="month">This Month</option>
+                                    <option value="year">This Year</option>
+                                    <option value="all">All Time</option>
+                                </select>
+                            </div>
+                            <div class="chart-container">
+                                <canvas id="expenseChart"></canvas>
+                            </div>
+                            <div class="chart-legend" id="chartLegend">
+                                <!-- Legend will be populated by JavaScript -->
+                            </div>
+                        </div>
+                    </section>
+                </div>
+            </div>
+        </main>
+
+        <!-- Bottom Navigation -->
+        <nav class="bottom-nav">
+            <button class="nav-btn active" data-view="dashboard">
+                <i class="fas fa-home"></i>
+                <span>Dashboard</span>
+            </button>
+            <button class="nav-btn" data-view="transactions">
+                <i class="fas fa-list"></i>
+                <span>Transactions</span>
+            </button>
+            <button class="nav-btn" data-view="reports">
+                <i class="fas fa-chart-bar"></i>
+                <span>Reports</span>
+            </button>
+            <button class="nav-btn" data-view="settings">
+                <i class="fas fa-cog"></i>
+                <span>Settings</span>
+            </button>
+        </nav>
+    </div>
+
+    <!-- Modals -->
+    <div class="modal" id="categoryModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-tag"></i> Add New Category</h3>
+                <button class="modal-close" id="closeCategoryModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="categoryForm">
+                    <div class="form-group">
+                        <label for="categoryName">Category Name</label>
+                        <input type="text" id="categoryName" placeholder="e.g., Groceries" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="categoryType">Type</label>
+                        <div class="type-selector">
+                            <button type="button" class="type-btn" data-type="income">
+                                <i class="fas fa-money-bill-wave"></i> Income
+                            </button>
+                            <button type="button" class="type-btn active" data-type="expense">
+                                <i class="fas fa-shopping-cart"></i> Expense
+                            </button>
+                        </div>
+                        <input type="hidden" id="categoryType" value="expense">
+                    </div>
+                    <div class="form-group">
+                        <label for="categoryColor">Color</label>
+                        <div class="color-picker" id="colorPicker">
+                            <!-- Colors will be populated by JavaScript -->
+                        </div>
+                        <input type="hidden" id="categoryColor" value="#3b82f6">
+                    </div>
+                    <div class="form-group">
+                        <label for="categoryIcon">Icon</label>
+                        <div class="icon-picker" id="iconPicker">
+                            <!-- Icons will be populated by JavaScript -->
+                        </div>
+                        <input type="hidden" id="categoryIcon" value="fas fa-question">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" id="cancelCategory">Cancel</button>
+                <button class="btn-primary" id="saveCategory">Save Category</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Export Modal -->
+    <div class="modal" id="exportModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-file-export"></i> Export Data</h3>
+                <button class="modal-close" id="closeExportModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p>Choose export format:</p>
+                <div class="export-options">
+                    <button class="export-option" data-format="csv">
+                        <i class="fas fa-file-csv"></i>
+                        <span>CSV File</span>
+                    </button>
+                    <button class="export-option" data-format="json">
+                        <i class="fas fa-file-code"></i>
+                        <span>JSON File</span>
+                    </button>
+                    <button class="export-option" data-format="print">
+                        <i class="fas fa-print"></i>
+                        <span>Print Summary</span>
+                    </button>
+                </div>
+                <div class="export-preview" id="exportPreview">
+                    <!-- Preview will be shown here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification Toast -->
+    <div class="toast" id="toast"></div>
+
+    <!-- Install Prompt -->
+    <div class="install-prompt" id="installPrompt">
+        <div class="install-content">
+            <i class="fas fa-download"></i>
+            <div class="install-text">
+                <h3>Install MoneyTrack</h3>
+                <p>Install app for better experience</p>
+            </div>
+            <div class="install-actions">
+                <button class="btn-secondary" id="dismissInstall">Later</button>
+                <button class="btn-primary" id="installApp">Install</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
